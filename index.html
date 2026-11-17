@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Desktop Snow — neve no ambiente de trabalho do Windows</title>
+<meta name="description" content="Um efeito de neve para o ambiente de trabalho do Windows: um único ficheiro Python, com bolas de neve, bonecos, limpa-neve e um menu de opções.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#e9edf4;
+    --paper-2:#f3f6fb;
+    --ink:#121a2c;
+    --ink-soft:#586178;
+    --line:#d2dbe8;
+    --night-1:#0a0f2c;
+    --night-2:#161d4c;
+    --on-night:#e8edfc;
+    --on-night-soft:#97a3cd;
+    --accent:#2f5fe0;
+    --amber:#ffb24d;
+    --wrap:72ch;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:"Hanken Grotesk",system-ui,sans-serif;font-size:18px;line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    padding:0 0 env(safe-area-inset-bottom,0px);
+  }
+  .wrap{max-width:var(--wrap);margin:0 auto;padding:0 28px}
+  h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:700;line-height:1.05;margin:0}
+  p{margin:0 0 1.1rem}
+  a{color:var(--accent);text-underline-offset:3px}
+  strong{font-weight:600}
+
+  /* ---------- top band ---------- */
+  .top{padding:clamp(28px,5vw,46px) 0 clamp(40px,7vw,70px)}
+  .brand{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:16px;letter-spacing:.01em;
+    color:var(--ink);display:inline-flex;align-items:center;gap:9px;margin-bottom:clamp(30px,6vw,56px)}
+  .brand svg{width:20px;height:20px}
+
+  /* the night window — the one bold element */
+  .window{position:relative;border-radius:22px;overflow:hidden;isolation:isolate;
+    background:linear-gradient(185deg,var(--night-2) 0%,var(--night-1) 70%);
+    box-shadow:0 36px 70px -34px rgba(12,18,54,.65),0 2px 0 0 rgba(255,255,255,.5) inset;
+    padding:clamp(38px,6vw,64px) clamp(28px,5vw,60px) clamp(44px,6vw,64px);}
+  #snow{position:absolute;inset:0;z-index:0;pointer-events:none}
+  .moon{position:absolute;top:34px;right:min(10%,80px);width:62px;height:62px;border-radius:50%;z-index:0;
+    background:radial-gradient(circle at 40% 36%,#fbf8ea,#e7e3c6 62%,#d6d2b7);
+    box-shadow:0 0 54px 14px rgba(236,232,206,.3)}
+  .window-ground{position:absolute;left:0;right:0;bottom:0;height:46px;z-index:0;
+    background:linear-gradient(180deg,transparent,rgba(224,232,248,.16));
+    -webkit-mask:radial-gradient(120% 90% at 50% 140%,#000 60%,transparent 62%);
+            mask:radial-gradient(120% 90% at 50% 140%,#000 60%,transparent 62%)}
+  .window > .inner{position:relative;z-index:1;max-width:38ch}
+  .flake{display:inline-block;color:#bcd2f2;font-size:26px;margin-bottom:18px}
+  .window h1{color:var(--on-night);font-size:clamp(38px,6.6vw,62px);letter-spacing:-.025em}
+  .window .tag{color:var(--on-night-soft);font-size:clamp(17px,2.3vw,20px);margin:.7em 0 1.8em}
+  .window .tag strong{color:var(--on-night)}
+  .actions{display:flex;gap:13px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;padding:13px 24px;border-radius:11px;font-weight:500;
+    font-family:"Bricolage Grotesque",sans-serif;font-size:16px;text-decoration:none;border:1.5px solid transparent;
+    transition:transform .14s ease}
+  .btn:hover{transform:translateY(-2px)}
+  .btn-solid{background:var(--on-night);color:var(--night-1)}
+  .btn-wire{border-color:rgba(188,201,236,.4);color:var(--on-night)}
+  .btn-wire:hover{border-color:rgba(188,201,236,.85)}
+  .note{color:var(--ink-soft);font-size:14.5px;margin:18px 2px 0}
+
+  /* ---------- the demo ---------- */
+  .demo{margin:clamp(34px,6vw,54px) auto 0;max-width:900px;padding:0 28px}
+  .demo figure{margin:0}
+  .demo img{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--line);
+    box-shadow:0 22px 44px -26px rgba(12,18,54,.5)}
+  .demo figcaption{margin:15px 2px 0;color:var(--ink-soft);font-size:14.5px}
+
+  /* ---------- editorial sections ---------- */
+  section{padding:clamp(54px,8vw,82px) 0}
+  .lead{font-size:clamp(25px,3.6vw,33px);font-family:"Bricolage Grotesque",sans-serif;font-weight:600;
+    letter-spacing:-.01em;line-height:1.22;max-width:30ch;margin:0 0 1.6em}
+  .lead .amber{color:#b9791f;background:linear-gradient(transparent 62%,rgba(255,178,77,.4) 0);padding:0 .05em}
+
+  /* features as a field-guide list, not cards */
+  .spec{border-top:1px solid var(--line)}
+  .spec .row{display:grid;grid-template-columns:minmax(9rem,13rem) 1fr;gap:10px 40px;
+    padding:22px 0;border-bottom:1px solid var(--line);align-items:baseline}
+  .spec .row h3{font-size:19px;font-weight:600;letter-spacing:-.01em}
+  .spec .row p{margin:0;color:var(--ink-soft);font-size:16.5px;line-height:1.55}
+
+  /* how it works */
+  .how{display:grid;grid-template-columns:1fr minmax(200px,300px);gap:clamp(28px,5vw,56px);align-items:start}
+  .how .prose p:last-child{margin-bottom:0}
+  .how figure{margin:0}
+  .how img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);
+    background:var(--night-1)}
+  .how figcaption{margin-top:11px;color:var(--ink-soft);font-size:14px}
+
+  .keys{margin-top:38px;border-top:1px solid var(--line)}
+  .keys .k{display:grid;grid-template-columns:minmax(9rem,12rem) 1fr;gap:14px 40px;align-items:center;
+    padding:13px 0;border-bottom:1px solid var(--line)}
+  kbd{justify-self:start;font-family:"Bricolage Grotesque",sans-serif;font-size:14px;font-weight:500;
+    background:var(--paper-2);border:1px solid var(--line);border-bottom-width:2.5px;border-radius:8px;
+    padding:6px 11px;color:var(--ink);white-space:nowrap}
+  .keys .k span{color:var(--ink-soft);font-size:16.5px}
+
+  /* closing */
+  .get{background:var(--paper-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .get .lead{margin-bottom:1em}
+  .get .actions .btn-solid{background:var(--night-1);color:var(--on-night)}
+  .get .actions .btn-wire{border-color:var(--line);color:var(--ink)}
+  .get .actions .btn-wire:hover{border-color:var(--ink-soft)}
+  .run{margin-top:22px;color:var(--ink-soft);font-size:15.5px}
+  .run code{font-family:"Bricolage Grotesque",ui-monospace,monospace;background:#fff;border:1px solid var(--line);
+    border-radius:6px;padding:3px 9px;color:var(--ink)}
+
+  footer{padding:30px 0 44px;color:var(--ink-soft);font-size:14px}
+  footer a{color:var(--ink-soft)}
+
+  @media(max-width:620px){
+    .spec .row,.keys .k{grid-template-columns:1fr;gap:5px 0}
+    .how{grid-template-columns:1fr}
+    .how figure{order:-1}
+  }
+  @media(prefers-reduced-motion:reduce){.btn{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="wrap">
+    <span class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#2f5fe0" stroke-width="1.6" stroke-linecap="round"><path d="M12 2v20M4.5 6l15 12M19.5 6l-15 12"/></svg>
+      Desktop Snow
+    </span>
+
+    <div class="window">
+      <canvas id="snow"></canvas>
+      <div class="moon" aria-hidden="true"></div>
+      <div class="window-ground" aria-hidden="true"></div>
+      <div class="inner">
+        <span class="flake" aria-hidden="true">❄</span>
+        <h1>Neve no teu<br>ambiente de trabalho</h1>
+        <p class="tag">Um efeito de neve para o Windows. <strong>Um único ficheiro Python</strong>, sem nada para instalar.</p>
+        <div class="actions">
+          <a class="btn btn-solid" href="https://snow.tiagoanoliveira.pt/DesktopSnow.exe">Descarregar para Windows</a>
+          <a class="btn btn-wire" href="https://github.com/USERNAME/REPOSITORY">Ver no GitHub</a>
+        </div>
+      </div>
+    </div>
+    <p class="note">Na primeira execução, o Windows mostra um aviso de app não assinada: clica em <strong>Mais informações</strong> e depois em <strong>Executar mesmo assim</strong>.</p>
+  </div>
+</div>
+
+<div class="demo">
+  <figure>
+    <img src="demo.gif" alt="A neve acumula-se no topo das janelas, formam-se bonecos de neve e um limpa-neve passa pela parte de baixo do ecrã.">
+    <figcaption>A animação a correr sobre um ambiente de trabalho do Windows.</figcaption>
+  </figure>
+</div>
+
+<main>
+  <section class="wrap">
+    <p class="lead">Começou pelas <span class="amber">trends natalícias</span> da época e virou uma desculpa para explorar desenvolvimento gráfico.</p>
+    <div class="spec">
+      <div class="row">
+        <h3>Acumula nas janelas</h3>
+        <p>A neve amontoa-se no topo de cada janela e escorrega pelos lados quando o monte fica demasiado íngreme.</p>
+      </div>
+      <div class="row">
+        <h3>Reage às janelas</h3>
+        <p>Fecha ou minimiza uma janela e a neve que lá estava cai. Arrasta-a devagar e a neve acompanha-a.</p>
+      </div>
+      <div class="row">
+        <h3>Bolas e bonecos</h3>
+        <p>De vez em quando forma-se uma bola de neve. Arrasta-a com o rato e empilha três para fazer um boneco, com gorro, cachecol e nariz de cenoura.</p>
+      </div>
+      <div class="row">
+        <h3>Limpa-neve</h3>
+        <p>Quando a neve se junta na parte de baixo do ecrã, passa um limpa-neve a tratar da limpeza.</p>
+      </div>
+      <div class="row">
+        <h3>Menu de opções</h3>
+        <p>Acessível por atalho, ajusta a intensidade e a velocidade de queda, limpa a neve e liga o arranque automático com o Windows.</p>
+      </div>
+      <div class="row">
+        <h3>Pausa instantânea</h3>
+        <p>Esconde tudo com um atalho, para capturas de ecrã e apresentações sem distrações.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <p class="lead">Como funciona</p>
+    <div class="how">
+      <div class="prose">
+        <p>É um único ficheiro Python, sem dependências. O efeito assenta numa janela transparente, sempre à frente, configurada para deixar passar os cliques para as aplicações por baixo.</p>
+        <p>Para posicionar a neve, o programa consulta a API do Windows e obtém a posição e o tamanho das janelas abertas, acumulando a neve no topo de cada uma. Esse topo é dividido em colunas estreitas, cada uma com a sua altura, o que dá aos montes a forma arredondada.</p>
+        <p>O ciclo de renderização é tolerante a falhas: um erro num frame é ignorado e a animação prossegue, em vez de bloquear.</p>
+      </div>
+      <figure>
+        <img src="menu.png" alt="Menu de opções do Desktop Snow: pausa, nova bola de neve, limpa-neve, intensidade e arranque com o Windows.">
+        <figcaption>O menu, aberto com Ctrl + Alt + S.</figcaption>
+      </figure>
+    </div>
+
+    <div class="keys">
+      <div class="k"><kbd>Ctrl + Alt + S</kbd><span>Abrir o menu</span></div>
+      <div class="k"><kbd>Ctrl + Alt + P</kbd><span>Pausar ou retomar</span></div>
+      <div class="k"><kbd>Ctrl + Alt + B</kbd><span>Nova bola de neve</span></div>
+      <div class="k"><kbd>Ctrl + Alt + L</kbd><span>Chamar o limpa-neve</span></div>
+      <div class="k"><kbd>Ctrl + Alt + R</kbd><span>Reiniciar</span></div>
+      <div class="k"><kbd>Ctrl + Alt + Q</kbd><span>Sair</span></div>
+    </div>
+  </section>
+
+  <section class="get">
+    <div class="wrap">
+      <p class="lead">Põe o teu ecrã a nevar</p>
+      <p style="color:var(--ink-soft);max-width:46ch;margin-top:-.6em">Descarrega o executável e faz duplo clique. Funciona no Windows 10 e 11, sem instalar nada.</p>
+      <div class="actions">
+        <a class="btn btn-solid" href="https://github.com/USERNAME/REPOSITORY/releases/latest/download/DesktopSnow.exe">Descarregar para Windows</a>
+        <a class="btn btn-wire" href="https://github.com/USERNAME/REPOSITORY">Ver no GitHub</a>
+      </div>
+      <p class="run">Preferes correr a partir do código? Com Python 3.8+: <code>python snow.pyw</code></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">Licença MIT · feito com Python por <a href="https://github.com/USERNAME">o teu nome</a></div>
+</footer>
+
+<script>
+(function(){
+  var c=document.getElementById("snow");if(!c)return;
+  var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var ctx=c.getContext("2d"),host=c.parentElement,flakes=[],w=0,h=0;
+  function size(){
+    w=c.width=host.offsetWidth;h=c.height=host.offsetHeight;
+    var n=Math.min(90,Math.round(w*h/13000));flakes=[];
+    for(var i=0;i<n;i++)flakes.push(mk(Math.random()*h));
+  }
+  function mk(y){var r=Math.random()*1.8+0.8;return{x:Math.random()*w,y:y,r:r,vy:r*0.35+0.25,ph:Math.random()*6.28};}
+  function frame(){
+    ctx.clearRect(0,0,w,h);ctx.fillStyle="#dbe6fb";
+    for(var i=0;i<flakes.length;i++){var f=flakes[i];
+      f.ph+=0.01;f.y+=f.vy;f.x+=Math.sin(f.ph)*0.4;
+      if(f.y>h+4){f.y=-4;f.x=Math.random()*w;}
+      ctx.globalAlpha=Math.min(.9,f.r/2.4+.25);
+      ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,6.2832);ctx.fill();
+    }
+    ctx.globalAlpha=1;if(!reduce)requestAnimationFrame(frame);
+  }
+  size();frame();
+  var t;addEventListener("resize",function(){clearTimeout(t);t=setTimeout(size,200);});
+})();
+</script>
+</body>
+</html>
