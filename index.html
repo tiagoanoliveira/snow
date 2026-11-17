@@ -22,7 +22,6 @@
     --on-night-soft:#97a3cd;
     --accent:#2f5fe0;
     --amber:#ffb24d;
-    --wrap:72ch;
   }
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -32,14 +31,14 @@
     -webkit-font-smoothing:antialiased;
     padding:0 0 env(safe-area-inset-bottom,0px);
   }
-  .wrap{max-width:var(--wrap);margin:0 auto;padding:0 28px}
+  .wrap{margin:0 auto;padding:0 28px}
   h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:700;line-height:1.05;margin:0}
   p{margin:0 0 1.1rem}
   a{color:var(--accent);text-underline-offset:3px}
   strong{font-weight:600}
 
   /* ---------- top band ---------- */
-  .top{padding:clamp(28px,5vw,46px) 0 clamp(40px,7vw,70px)}
+  .top{padding:clamp(28px,5vw,46px) 0 clamp(5px,7vw,10px)}
   .brand{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:16px;letter-spacing:.01em;
     color:var(--ink);display:inline-flex;align-items:center;gap:9px;margin-bottom:clamp(30px,6vw,56px)}
   .brand svg{width:20px;height:20px}
@@ -158,7 +157,7 @@
 
 <div class="demo">
   <figure>
-    <img src="demo.gif" alt="A neve acumula-se no topo das janelas, formam-se bonecos de neve e um limpa-neve passa pela parte de baixo do ecrã.">
+    <img src="docs/demo.mp4" alt="A neve acumula-se no topo das janelas, formam-se bonecos de neve e um limpa-neve passa pela parte de baixo do ecrã.">
     <figcaption>A animação a correr sobre um ambiente de trabalho do Windows.</figcaption>
   </figure>
 </div>
@@ -203,7 +202,7 @@
         <p>O ciclo de renderização é tolerante a falhas: um erro num frame é ignorado e a animação prossegue, em vez de bloquear.</p>
       </div>
       <figure>
-        <img src="menu.png" alt="Menu de opções do Desktop Snow: pausa, nova bola de neve, limpa-neve, intensidade e arranque com o Windows.">
+        <img src="docs/menu.png" alt="Menu de opções do Desktop Snow: pausa, nova bola de neve, limpa-neve, intensidade e arranque com o Windows.">
         <figcaption>O menu, aberto com Ctrl + Alt + S.</figcaption>
       </figure>
     </div>
